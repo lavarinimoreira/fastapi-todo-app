@@ -16,6 +16,7 @@ class Users(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
     role = Column(String) # Confere se o usuário é administrador ou não. Endpoints específicos serão criados para admins.
+    phone_number = Column(String)
 
 # Um "todo" pertence obrigatoriamente a apenas um usuário.
 # Na relação 1:n é criado uma coluna na tabela "n" contendo a chave estrangeira.
