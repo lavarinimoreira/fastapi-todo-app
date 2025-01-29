@@ -6,8 +6,13 @@ from routers import auth, todos, admin, users
 
 app = FastAPI()
 
-# A linha de código abaixo será executado somente se o "todo database" não existir.
+# A linha do código abaixo será executado somente se o "todo database" não existir.
 models.Base.metadata.create_all(bind=engine)
+
+@app.get('/healthy')
+def health_check():
+    return{'status': 'Healthy'}
+
 
 app.include_router(auth.router)
 app.include_router(todos.router)
