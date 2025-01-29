@@ -79,6 +79,7 @@ class CreateUserRequest(BaseModel):
     last_name: str
     password: str
     role: str
+    phone_number: str
 
 
 class Token(BaseModel):
@@ -86,6 +87,11 @@ class Token(BaseModel):
     token_type: str
 
 
+
+
+# CREATE routers -------------------------------------------------------------------
+
+# create_user
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
     create_user_model = UsersModel(
@@ -95,13 +101,15 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
         last_name=create_user_request.last_name,
         hashed_password=bcrypt_context.hash(create_user_request.password),
         role=create_user_request.role,
-        is_active=True
+        is_active=True,
+        phone_number=create_user_request.phone_number
     )
 
     db.add(create_user_model)
     db.commit()
 
 
+# login
 @router.post('/token', response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
