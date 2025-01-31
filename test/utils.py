@@ -11,7 +11,9 @@ from main import app
 from fastapi.testclient import TestClient
 import pytest
 from models import Todos as TodosModel
-
+from models import Users as UserModel
+from fastapi import status
+from routers.auth import bcrypt_context
 
 
 # Configuração do banco de dados para testes
@@ -39,7 +41,7 @@ def override_get_db():
 
 # Função que substitui a autenticação real por um usuário fictício
 def override_get_current_user():
-    return {'sub': 'test_user', 'id': 1, 'role': 'admin'}  # Retorna um usuário fictício para os testes
+    return {'username': 'test_user', 'id': 1, 'user_role': 'admin'}  # Retorna um usuário fictício para os testes
 
 
 # Criamos um cliente de teste para fazer requisições à API simulada
@@ -64,4 +66,30 @@ def test_todo():
     yield todo
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM todos;"))
+        connection.commit()
+
+
+
+
+
+@pytest.fixture
+def test_user():
+    user = UserModel(
+        username="test_user",
+        email="test@example.com",
+        first_name="Test",
+        last_name="User",
+        hashed_password=bcrypt_context.hash("testpassword"),  # Senha deve estar hasheada
+        role="admin",  # 'admin' para testes específicos
+        phone_number="(99) 99999-9999"
+    )
+
+    db = TestingSessionLocal()
+    db.add(user)
+    db.commit()
+
+    # APÓS O TESTE, LIMPA O BANCO DE DADOS
+    yield user
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM users;"))
         connection.commit()
